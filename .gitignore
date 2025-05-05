@@ -1,12 +1,35 @@
+
+##################################
+# Build output
+##################################
 bin/
 obj/
+
+##################################
+# VS and user-specific files
+##################################
+.vs/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
 
-.vs/
-.vscode/
-.env
+##################################
+# Environment settings and secrets
+##################################
 launchSettings.json
 appsettings.Development.json
+.env
+
+##################################
+# Rider/VS Code (optional, if used)
+##################################
+.idea/
+.vscode/
+*.code-workspace
+
+##################################
+# Logs
+##################################
+*.log
+

@@ -19,54 +19,40 @@ namespace FashionStoreAPI.Services
 
         public async Task<List<BasicCategoryResponse>> GetAllCategoriesAsync()
         {
-            try
+            var categories = await _context.Categories
+            .OrderBy(c => c.Name)
+            .Select(c => new BasicCategoryResponse
             {
-                var categories = await _context.Categories
-                .OrderBy(c => c.Name)
-                .Select(c => new BasicCategoryResponse
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                }).ToListAsync();
+                Id = c.Id,
+                Name = c.Name
+            }).ToListAsync();
 
-                return categories;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Ett fel inträffade när kategorierna skulle hämtas. Vänligen försök igen.", ex);
-            }
+            return categories;
         }
 
         public async Task<DetailedCategoryResponse> GetProductsByCategoryAsync(int categoryId)
         {
-            try
+            var categoryWithProducts = await _context.Categories
+            .Include(c => c.Products)
+                .ThenInclude(p => p.ProductVariants)
+            .FirstOrDefaultAsync(c => c.Id == categoryId) ?? throw new ResourceNotFoundException("Kategorin finns inte.");
+
+
+            var response = new DetailedCategoryResponse
             {
-                var categoryWithProducts = await _context.Categories
-                .Include(c => c.Products)
-                    .ThenInclude(p => p.ProductVariants)
-                .FirstOrDefaultAsync(c => c.Id == categoryId) ?? throw new ResourceNotFoundException("Kategorin finns inte.");
-
-
-                var response = new DetailedCategoryResponse
+                Id = categoryWithProducts.Id,
+                Name = categoryWithProducts.Name,
+                ProductCount = categoryWithProducts.Products.Count,
+                ProductsInCategory = categoryWithProducts.Products.Select(p => new ProductResponse
                 {
-                    Id = categoryWithProducts.Id,
-                    Name = categoryWithProducts.Name,
-                    ProductCount = categoryWithProducts.Products.Count,
-                    ProductsInCategory = categoryWithProducts.Products.Select(p => new ProductResponse
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        ImageUrl = p.ImageUrl,
-                        StartPrice = p.ProductVariants.Count != 0 ? p.ProductVariants.Min(v => v.Price) : 0
-                    }).ToList()
-                };
+                    Id = p.Id,
+                    Name = p.Name,
+                    ImageUrl = p.ImageUrl,
+                    StartPrice = p.ProductVariants.Count != 0 ? p.ProductVariants.Min(v => v.Price) : 0
+                }).ToList()
+            };
 
-                return response;
-            }            
-            catch (Exception ex)
-            {
-                throw new Exception("Ett fel inträffade när kategorin och dess produkter skulle hämtas. Vänligen försök igen.", ex);
-            }
+            return response;
         }
 
         public async Task<BasicCategoryResponse> CreateNewCategoryAsync(CreateNewCategoryRequest request)
@@ -95,12 +81,8 @@ namespace FashionStoreAPI.Services
             }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
             {
-                throw new ArgumentException("Namnet på kategorin kan max vara 30 tecken långt.", ex); // Testa detta sedan.
+                throw new ArgumentException("Namnet på kategorin kan max vara 30 tecken långt."); // Testa detta sedan.
             }            
-            catch (Exception ex)
-            {
-                throw new Exception("Ett fel inträffade när kategorin skulle sparas i databasen. Vänligen försök igen.", ex);
-            }
         }
     }
 }

@@ -17,6 +17,34 @@ namespace FashionStoreAPI.Services
             _context = context;
         }
 
+        public async Task<ProductResponse> GetProductAsync(int productId)
+        {
+            var product = await _context.Products
+                .Include(p => p.ProductVariants)
+                .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new ResourceNotFoundException("Produkten finns inte.");
+
+            var response = new ProductResponse
+            {
+                Id = product.Id,
+                Name = product.Name,
+                ImageUrl = product.ImageUrl,
+                Description = product.Description ?? "",
+                Color = product.Color,
+                StartPrice = product.ProductVariants.Count != 0 ? product.ProductVariants.Min(v => v.Price) : 0,
+                ProductVariants = product.ProductVariants.Select(v => new ProductVariantResponse
+                {
+                    Id = v.Id,
+                    Size = v.Size,
+                    SKU = v.SKU,
+                    Price = v.Price,
+                    Stock = v.Stock,
+                    ProductId = v.ProductId
+                }).ToList()
+            };
+
+            return response;
+        }
+
         public async Task<ProductResponse> CreateNewProductAsync(CreateNewProductRequest request)
         {
             var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name);
@@ -49,12 +77,44 @@ namespace FashionStoreAPI.Services
             }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
             {
-                throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 40 tecken.", ex); // Testa detta sedan.
-            }            
-            catch (Exception ex)
-            {
-                throw new Exception("Ett fel inträffade när produkten skulle sparas i databasen. Vänligen försök igen.", ex);
+                throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 40 tecken."); // Testa detta sedan.
             }
+        }
+
+        public async Task<ProductResponse> UpdateExistingProductAsync(int productId, UpdateExistingProductRequest request)
+        {
+            var existingProduct = await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new ResourceNotFoundException("Produkten finns inte.");
+
+            try
+            {
+                if (request.Name != null && request.Name != existingProduct.Name)
+                    existingProduct.Name = request.Name;
+
+                if (request.Description != null && request.Description != existingProduct.Description)
+                    existingProduct.Description = request.Description;
+
+                if (request.Color != null && request.Color != existingProduct.Color)
+                    existingProduct.Color = request.Color;
+
+                if (request.ImageUrl != null && request.ImageUrl != existingProduct.ImageUrl)
+                    existingProduct.ImageUrl = request.ImageUrl;
+
+                await _context.SaveChangesAsync();
+
+                return new ProductResponse
+                {
+                    Id = existingProduct.Id,
+                    Name = existingProduct.Name,
+                    ImageUrl = existingProduct.ImageUrl,
+                    Description = existingProduct.Description ?? "",
+                    Color = existingProduct.Color
+                };
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+            {
+                throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 40 tecken.");
+            }            
         }
     }
 }

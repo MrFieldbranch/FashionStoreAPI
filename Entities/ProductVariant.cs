@@ -18,13 +18,13 @@ namespace FashionStoreAPI.Entities
 
         public required double Price { get; set; }
 
-        public int Stock { get; set; } = 0;  // Kanske lägga till att den inte får vara negativ
+        [Range(0, int.MaxValue, ErrorMessage = "Lagersaldo kan inte vara negativt.")]
+        public int Stock { get; set; } = 0;  
 
         public int ProductId { get; set; }
 
 
         // Navigation property
-        public Product? Product { get; set; }
-              
+        public Product? Product { get; set; }              
     }
 }

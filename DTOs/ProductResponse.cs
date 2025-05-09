@@ -13,5 +13,7 @@
         public string? Description { get; set; }
 
         public string? Color { get; set; }
+
+        public List<ProductVariantResponse> ProductVariants { get; set; } = [];
     }
 }

@@ -28,11 +28,11 @@ namespace FashionStoreAPI.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return StatusCode(500, $"Konfigurationsproblem: {ex.Message}" );
+                return StatusCode(500, $"Konfigurationsproblem. {ex.Message}" );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, $"Problem med databasen: {ex.Message}");
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
         }
     }    

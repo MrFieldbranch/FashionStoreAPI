@@ -1,6 +1,6 @@
 ﻿namespace FashionStoreAPI.DTOs
 {
-    public class UpdateProductVariantManuallyRequest
+    public class UpdateProductVariantRequest
     {
         public required int ProductVariantId { get; set; }
 

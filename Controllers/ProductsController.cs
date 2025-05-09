@@ -17,6 +17,24 @@ namespace FashionStoreAPI.Controllers
             _productsService = productsService;
         }
 
+        [HttpGet("{productId:int}")]
+        public async Task<ActionResult<ProductResponse>> GetProduct(int productId)
+        {
+            try
+            {
+                var product = await _productsService.GetProductAsync(productId);
+                return Ok(product);
+            }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
+            }
+        }        
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateNewProduct(CreateNewProductRequest request)
@@ -35,9 +53,32 @@ namespace FashionStoreAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, $"Problem med databasen: {ex.Message}");
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{productId:int}")]
+        public async Task<IActionResult> UpdateExistingProduct(int productId, UpdateExistingProductRequest request)
+        {
+            try
+            {
+                var updatedProduct = await _productsService.UpdateExistingProductAsync(productId, request);
+                return Ok(updatedProduct);
+            }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
         }
 

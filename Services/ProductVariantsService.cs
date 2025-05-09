@@ -46,7 +46,7 @@ namespace FashionStoreAPI.Services
             };
 
             try
-            {                
+            {
                 existingProduct.ProductVariants.Add(newVariant);
 
                 await _context.SaveChangesAsync();
@@ -63,12 +63,37 @@ namespace FashionStoreAPI.Services
             }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
             {
-                throw new ArgumentException("Max längd: Storlek: 15 tecken, SKU: 20 tecken.", ex); // Testa detta sedan. Kanske lägga till att Stock inte får vara negativ.
-            }            
-            catch (Exception ex)
-            {
-                throw new Exception("Ett fel inträffade när produktvarianten skulle sparas i databasen. Vänligen försök igen.", ex);
+                throw new ArgumentException("Max längd: Storlek: 15 tecken, SKU: 20 tecken."); // Testa detta sedan. Kanske lägga till att Stock inte får vara negativ.
             }
+        }
+
+        public async Task<ProductVariantResponse> UpdateExistingProductVariantAsync(UpdateProductVariantRequest request)
+        {
+            var variant = await _context.ProductVariants
+                .FirstOrDefaultAsync(v => v.Id == request.ProductVariantId)
+                ?? throw new ResourceNotFoundException("Produktvarianten finns inte.");
+
+            if (request.StockChange != null)
+            {
+                variant.Stock += request.StockChange.Value;
+                if (variant.Stock < 0)
+                    throw new ArgumentException("Lagersaldot kan inte vara negativt.");
+            }
+
+            if (request.NewPrice != null && request.NewPrice != variant.Price)
+                variant.Price = request.NewPrice.Value;
+
+            await _context.SaveChangesAsync();
+
+            return new ProductVariantResponse
+            {
+                Id = variant.Id,
+                Size = variant.Size,
+                SKU = variant.SKU,
+                Price = variant.Price,
+                Stock = variant.Stock,
+                ProductId = variant.ProductId
+            };
         }
     }
 }

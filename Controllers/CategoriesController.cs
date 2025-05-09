@@ -27,9 +27,9 @@ namespace FashionStoreAPI.Controllers
 
                 return Ok(categories);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, $"Problem med databasen: {ex.Message}");
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
         }
 
@@ -46,9 +46,9 @@ namespace FashionStoreAPI.Controllers
             {
                 return NotFound(ex.Message);
             }            
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, $"Problem med databasen: {ex.Message}");
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
         }
 
@@ -70,9 +70,9 @@ namespace FashionStoreAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, $"Ett oväntat fel inträffade. {ex.Message}");
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
         }
     }

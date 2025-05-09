@@ -17,12 +17,23 @@ namespace FashionStoreAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            var tokenResponse = await _loginService.AuthenticateAsync(request);
+            try
+            {
+                var tokenResponse = await _loginService.AuthenticateAsync(request);
 
-            if (tokenResponse == null)            
-                return Unauthorized("Felaktiga inloggningsuppgifter.");            
-            
-            return Ok(tokenResponse);
+                if (tokenResponse == null)
+                    return Unauthorized("Felaktiga inloggningsuppgifter.");
+
+                return Ok(tokenResponse);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(500, $"Konfigurationsproblem: {ex.Message}" );
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Problem med databasen: {ex.Message}");
+            }
         }
     }    
 }

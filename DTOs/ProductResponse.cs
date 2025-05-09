@@ -1,6 +1,6 @@
 ﻿namespace FashionStoreAPI.DTOs
 {
-    public class BasicProductResponse
+    public class ProductResponse
     {
         public int Id { get; set; }
 
@@ -8,6 +8,10 @@
 
         public required string ImageUrl { get; set; }
 
-        public required double StartPrice { get; set; }
+        public double? StartPrice { get; set; }
+
+        public string? Description { get; set; }
+
+        public string? Color { get; set; }
     }
 }

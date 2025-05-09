@@ -12,7 +12,7 @@ namespace FashionStoreAPI.Entities
         public required string Name { get; set; }
 
         [MaxLength(200)]
-        public required string Description { get; set; }
+        public string? Description { get; set; }
 
         [MaxLength(40)]
         public required string ImageUrl { get; set; }

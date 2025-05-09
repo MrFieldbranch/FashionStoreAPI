@@ -18,7 +18,7 @@ namespace FashionStoreAPI.Entities
 
         public required double Price { get; set; }
 
-        public int Stock { get; set; } = 0;
+        public int Stock { get; set; } = 0;  // Kanske lägga till att den inte får vara negativ
 
         public int ProductId { get; set; }
 

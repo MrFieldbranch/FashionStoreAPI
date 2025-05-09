@@ -1,6 +1,7 @@
 ﻿using FashionStoreAPI.Data;
 using FashionStoreAPI.DTOs;
 using FashionStoreAPI.Entities;
+using FashionStoreAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using System.ComponentModel.DataAnnotations;
@@ -30,17 +31,9 @@ namespace FashionStoreAPI.Services
 
                 return categories;
             }
-            catch (InvalidOperationException ex)
-            {
-                throw new InvalidOperationException("Ett fel inträffade när kategorierna skulle hämtas från databasen.", ex);
-            }
-            catch (NpgsqlException ex) // Specific for PostgreSQL
-            {
-                throw new InvalidOperationException("Databasanslutningen misslyckades.", ex);
-            }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Ett oväntat fel inträffade.", ex);
+                throw new Exception("Ett fel inträffade när kategorierna skulle hämtas. Vänligen försök igen.", ex);
             }
         }
 
@@ -51,7 +44,7 @@ namespace FashionStoreAPI.Services
                 var categoryWithProducts = await _context.Categories
                 .Include(c => c.Products)
                     .ThenInclude(p => p.ProductVariants)
-                .FirstOrDefaultAsync(c => c.Id == categoryId) ?? throw new ArgumentException("Kategorin finns inte.");
+                .FirstOrDefaultAsync(c => c.Id == categoryId) ?? throw new ResourceNotFoundException("Kategorin finns inte.");
 
 
                 var response = new DetailedCategoryResponse
@@ -59,7 +52,7 @@ namespace FashionStoreAPI.Services
                     Id = categoryWithProducts.Id,
                     Name = categoryWithProducts.Name,
                     ProductCount = categoryWithProducts.Products.Count,
-                    ProductsInCategory = categoryWithProducts.Products.Select(p => new BasicProductResponse
+                    ProductsInCategory = categoryWithProducts.Products.Select(p => new ProductResponse
                     {
                         Id = p.Id,
                         Name = p.Name,
@@ -69,18 +62,10 @@ namespace FashionStoreAPI.Services
                 };
 
                 return response;
-            }
-            catch (InvalidOperationException ex) 
-            {
-                throw new InvalidOperationException("Ett fel inträffade när kategorin skulle hämtas från databasen.", ex);
-            }
-            catch (NpgsqlException ex) // Specific for PostgreSQL
-            {
-                throw new InvalidOperationException("Databasanslutningen misslyckades.", ex);
-            }
+            }            
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Ett oväntat fel inträffade.", ex);
+                throw new Exception("Ett fel inträffade när kategorin och dess produkter skulle hämtas. Vänligen försök igen.", ex);
             }
         }
 
@@ -89,7 +74,7 @@ namespace FashionStoreAPI.Services
             var existingCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Name == request.Name);
 
             if (existingCategory != null)
-                throw new ArgumentException("Kategorin finns redan.");
+                throw new ConflictException("Kategorin finns redan.");
 
             var newCategory = new Category
             {
@@ -108,17 +93,13 @@ namespace FashionStoreAPI.Services
                     Name = newCategory.Name
                 };
             }
-            catch (ValidationException ex)
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
             {
                 throw new ArgumentException("Namnet på kategorin kan max vara 30 tecken långt.", ex); // Testa detta sedan.
-            }
-            catch (DbUpdateException ex)
-            {
-                throw new ArgumentException("Ett fel inträffade när kategorin skulle sparas i databasen.", ex);
-            }
+            }            
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Ett oväntat fel inträffade.", ex);
+                throw new Exception("Ett fel inträffade när kategorin skulle sparas i databasen. Vänligen försök igen.", ex);
             }
         }
     }

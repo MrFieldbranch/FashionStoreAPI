@@ -8,6 +8,6 @@
 
         public int ProductCount { get; set; }
 
-        public List<BasicProductResponse> ProductsInCategory { get; set; } = [];
+        public List<ProductResponse> ProductsInCategory { get; set; } = [];
     }
 }

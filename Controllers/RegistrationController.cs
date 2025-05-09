@@ -22,13 +22,17 @@ namespace FashionStoreAPI.Controllers
                 bool newUserResponse = await _registrationService.RegisterNewUserAsync(request);
 
                 if (!newUserResponse)
-                    return BadRequest("Det finns redan en användare med denna email registrerad.");
+                    return Conflict("Det finns redan en användare med denna email registrerad.");
 
                 return Ok();
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Problem med databasen: {ex.Message}");
             }
         }
     }

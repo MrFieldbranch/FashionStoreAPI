@@ -4,7 +4,7 @@ namespace FashionStoreAPI.DTOs
 {
     public class CreateNewProductVariantRequest
     {
-        public required int ProductId { get; set; }
+        //public required int ProductId { get; set; }   Ha med ProductId som route parameter istället
         
         public required string Size { get; set; }
         

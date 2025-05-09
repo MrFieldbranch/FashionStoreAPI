@@ -1,4 +1,5 @@
 ﻿using FashionStoreAPI.DTOs;
+using FashionStoreAPI.Exceptions;
 using FashionStoreAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -26,13 +27,9 @@ namespace FashionStoreAPI.Controllers
 
                 return Ok(categories);
             }
-            catch (InvalidOperationException ex)
-            {
-                return StatusCode(500, $"Fel vid hämtning av kategorier: {ex.Message}");
-            }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ett oväntat fel inträffade. {ex.Message}");
+                return StatusCode(500, $"Problem med databasen: {ex.Message}");
             }
         }
 
@@ -45,17 +42,13 @@ namespace FashionStoreAPI.Controllers
 
                 return Ok(categoryWithProducts);
             }
-            catch (ArgumentException ex)
+            catch (ResourceNotFoundException ex)
             {
                 return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return StatusCode(500, $"Fel vid hämtning av kategorin (inklusive produkter). {ex.Message}");
-            }
+            }            
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ett oväntat fel inträffade. {ex.Message}");
+                return StatusCode(500, $"Problem med databasen: {ex.Message}");
             }
         }
 
@@ -68,6 +61,10 @@ namespace FashionStoreAPI.Controllers
                 var newCategory = await _categoriesService.CreateNewCategoryAsync(request);
 
                 return Created($"/categories/{newCategory.Id}", newCategory);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
             }
             catch (ArgumentException ex)
             {

@@ -2,6 +2,7 @@
 using FashionStoreAPI.DTOs;
 using FashionStoreAPI.Entities;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace FashionStoreAPI.Services
 {
@@ -38,9 +39,13 @@ namespace FashionStoreAPI.Services
 
                 return true; // Registration successful
             }
-            catch
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)  // Testa detta sen
             {
                 throw new ArgumentException("Email kan max vara 40 tecken långt, lösenordet, förnamnet och efternamnet kan max vara 30 tecken långa var.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Ett fel inträffade när användaren skulle sparas i databasen. Vänligen försök igen.", ex);
             }
         }
     }

@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FashionStoreAPI.Controllers
-{
-    [Authorize]
+{    
     [ApiController]
     [Route("[controller]")]
     public class CategoriesController : ControllerBase

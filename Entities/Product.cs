@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FashionStoreAPI.Enums;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace FashionStoreAPI.Entities
@@ -10,6 +11,8 @@ namespace FashionStoreAPI.Entities
 
         [MaxLength(30)]
         public required string Name { get; set; }
+
+        public Sex ProductSex { get; set; }
 
         [MaxLength(200)]
         public string? Description { get; set; }

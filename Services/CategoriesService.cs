@@ -47,6 +47,7 @@ namespace FashionStoreAPI.Services
                 {
                     Id = p.Id,
                     Name = p.Name,
+                    ProductSex = p.ProductSex,
                     ImageUrl = p.ImageUrl,
                     StartPrice = p.ProductVariants.Count != 0 ? p.ProductVariants.Min(v => v.Price) : 0
                 }).ToList()

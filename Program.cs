@@ -11,8 +11,23 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Services
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<LoginService>();
+builder.Services.AddScoped<CategoriesService>();
+builder.Services.AddScoped<ProductsService>();
+builder.Services.AddScoped<ProductVariantsService>();
 
 builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173", "http://localhost:5174") // Lägg till sen: production url.
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 
 builder.Services
     .AddAuthentication()
@@ -36,6 +51,8 @@ builder.Services
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();

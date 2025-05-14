@@ -1,10 +1,14 @@
-﻿namespace FashionStoreAPI.DTOs
+﻿using FashionStoreAPI.Enums;
+
+namespace FashionStoreAPI.DTOs
 {
     public class ProductResponse
     {
         public int Id { get; set; }
 
         public required string Name { get; set; }
+
+        public Sex ProductSex { get; set; }
 
         public required string ImageUrl { get; set; }
 

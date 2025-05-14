@@ -1,4 +1,5 @@
 ﻿using FashionStoreAPI.Entities;
+using FashionStoreAPI.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace FashionStoreAPI.Data
@@ -27,7 +28,7 @@ namespace FashionStoreAPI.Data
                 .HasKey(sbi => new { sbi.UserId, sbi.ProductVariantId });
 
             modelBuilder.Entity<OrderItem>()
-                .HasKey(oi => new { oi.OrderId, oi.ProductVariantId });
+                .HasKey(oi => new { oi.OrderId, oi.ProductVariantId });           
         }
     }
 }

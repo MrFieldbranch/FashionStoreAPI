@@ -27,6 +27,7 @@ namespace FashionStoreAPI.Services
             {
                 Id = product.Id,
                 Name = product.Name,
+                ProductSex = product.ProductSex,
                 ImageUrl = product.ImageUrl,
                 Description = product.Description ?? "",
                 Color = product.Color,
@@ -55,6 +56,7 @@ namespace FashionStoreAPI.Services
             var newProduct = new Product
             {
                 Name = request.Name,
+                ProductSex = request.ProductSex,
                 Description = request.Description ?? "",
                 ImageUrl = request.ImageUrl,
                 Color = request.Color
@@ -70,6 +72,7 @@ namespace FashionStoreAPI.Services
                 {
                     Id = newProduct.Id,
                     Name = newProduct.Name,
+                    ProductSex = newProduct.ProductSex,
                     ImageUrl = newProduct.ImageUrl,
                     Description = newProduct.Description ?? "",
                     Color = newProduct.Color
@@ -100,12 +103,16 @@ namespace FashionStoreAPI.Services
                 if (request.ImageUrl != null && request.ImageUrl != existingProduct.ImageUrl)
                     existingProduct.ImageUrl = request.ImageUrl;
 
+                if (request.ProductSex != null && request.ProductSex != existingProduct.ProductSex)
+                    existingProduct.ProductSex = request.ProductSex.Value;
+
                 await _context.SaveChangesAsync();
 
                 return new ProductResponse
                 {
                     Id = existingProduct.Id,
                     Name = existingProduct.Name,
+                    ProductSex = existingProduct.ProductSex,
                     ImageUrl = existingProduct.ImageUrl,
                     Description = existingProduct.Description ?? "",
                     Color = existingProduct.Color

@@ -46,12 +46,15 @@ namespace FashionStoreAPI.Services
             return response;
         }
 
-        public async Task<ProductResponse> CreateNewProductAsync(CreateNewProductRequest request)
+        public async Task<ProductResponse> CreateNewProductAsync(int categoryId, CreateNewProductRequest request)
         {
             var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name);
 
             if (existingProduct != null)
                 throw new ConflictException("En produkt med detta namn finns redan.");
+
+            var existingCategory = await _context.Categories
+                .FirstOrDefaultAsync(c => c.Id == categoryId) ?? throw new ResourceNotFoundException("Kategorin finns inte.");
 
             var newProduct = new Product
             {
@@ -59,8 +62,10 @@ namespace FashionStoreAPI.Services
                 ProductSex = request.ProductSex,
                 Description = request.Description ?? "",
                 ImageUrl = request.ImageUrl,
-                Color = request.Color
+                Color = request.Color                
             };
+
+            newProduct.Categories.Add(existingCategory);
 
             try
             {
@@ -80,7 +85,7 @@ namespace FashionStoreAPI.Services
             }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
             {
-                throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 40 tecken."); // Testa detta sedan.
+                throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 200 tecken."); // Testa detta sedan.
             }
         }
 
@@ -120,7 +125,7 @@ namespace FashionStoreAPI.Services
             }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
             {
-                throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 40 tecken.");
+                throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 200 tecken.");
             }            
         }
     }

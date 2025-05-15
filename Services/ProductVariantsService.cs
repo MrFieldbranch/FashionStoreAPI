@@ -63,7 +63,7 @@ namespace FashionStoreAPI.Services
             }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
             {
-                throw new ArgumentException("Max längd: Storlek: 15 tecken, SKU: 20 tecken."); // Testa detta sedan. Kanske lägga till att Stock inte får vara negativ.
+                throw new ArgumentException("Max längd: Storlek: 15 tecken, SKU: 20 tecken."); // Testa detta sedan.
             }
         }
 

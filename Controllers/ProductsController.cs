@@ -35,18 +35,22 @@ namespace FashionStoreAPI.Controllers
         }        
 
         [Authorize(Roles = "Admin")]
-        [HttpPost]
-        public async Task<IActionResult> CreateNewProduct(CreateNewProductRequest request)
+        [HttpPost("{categoryId:int}")]
+        public async Task<IActionResult> CreateNewProduct(int categoryId, CreateNewProductRequest request)
         {
             try
             {
-                var newProduct = await _productsService.CreateNewProductAsync(request);
+                var newProduct = await _productsService.CreateNewProductAsync(categoryId, request);
 
                 return Created($"/products/{newProduct.Id}", newProduct);
             }
             catch (ConflictException ex)
             {
                 return Conflict(ex.Message);
+            }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (ArgumentException ex)
             {

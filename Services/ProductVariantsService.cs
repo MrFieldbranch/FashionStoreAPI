@@ -34,7 +34,10 @@ namespace FashionStoreAPI.Services
                 .FirstOrDefaultAsync(v => v.SKU == request.SKU);
 
             if (existingSKU != null)
-                throw new ConflictException("Detta SKU finns redan i databasen.");             
+                throw new ConflictException("Detta SKU finns redan i databasen.");
+
+            if (request.Stock < 0)
+                throw new ArgumentException("Lagersaldot kan inte vara negativt.");
 
             var newVariant = new ProductVariant
             {

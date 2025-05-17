@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FashionStoreAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("login")]
     public class LoginController : ControllerBase
     {
         private readonly LoginService _loginService;

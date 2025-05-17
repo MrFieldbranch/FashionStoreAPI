@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FashionStoreAPI.Controllers
 {    
     [ApiController]
-    [Route("[controller]")]
+    [Route("products")]
     public class ProductsController : ControllerBase
     {
         private readonly ProductsService _productsService;
@@ -74,6 +74,10 @@ namespace FashionStoreAPI.Controllers
             catch (ResourceNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
             }
             catch (ArgumentException ex)
             {

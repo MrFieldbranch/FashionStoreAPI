@@ -34,12 +34,12 @@ namespace FashionStoreAPI.Services
                 StartPrice = product.ProductVariants.Count != 0 ? product.ProductVariants.Min(v => v.Price) : 0,
                 ProductVariants = product.ProductVariants.Select(v => new ProductVariantResponse
                 {
-                    Id = v.Id,
+                    ProductVariantId = v.Id,
                     Size = v.Size,
                     SKU = v.SKU,
                     Price = v.Price,
                     Stock = v.Stock,
-                    ProductId = v.ProductId
+                    ProductId = product.Id
                 }).ToList()
             };
 
@@ -97,7 +97,14 @@ namespace FashionStoreAPI.Services
             try
             {
                 if (request.Name != null && request.Name != existingProduct.Name)
-                    existingProduct.Name = request.Name;
+                {
+                    var existingProductWithSameName = await _context.Products
+                        .FirstOrDefaultAsync(p => p.Name == request.Name);
+                    if (existingProductWithSameName != null)
+                        throw new ConflictException("En produkt med detta namn finns redan.");                    
+                    else
+                        existingProduct.Name = request.Name;
+                }                     
 
                 if (request.Description != null && request.Description != existingProduct.Description)
                     existingProduct.Description = request.Description;

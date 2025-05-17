@@ -24,17 +24,17 @@ namespace FashionStoreAPI.Services
                 .FirstOrDefaultAsync(p => p.Id == productId)
                 ?? throw new ResourceNotFoundException("Produkten finns inte.");
 
-            var duplicateVariant = await _context.ProductVariants
-                .FirstOrDefaultAsync(v => v.ProductId == productId && v.Size == request.Size || v.SKU == request.SKU);
+            var existingSize = existingProduct.ProductVariants
+                .FirstOrDefault(v => v.Size == request.Size);
 
-            if (duplicateVariant != null)
-            {
-                if (duplicateVariant.Size == request.Size)
-                    throw new ConflictException("En variant med denna storlek finns redan.");
+            if (existingSize != null)
+                throw new ConflictException("Denna produkt har redan denna storlek.");
 
-                if (duplicateVariant.SKU == request.SKU)
-                    throw new ConflictException("En variant med detta SKU finns redan.");
-            }
+            var existingSKU = await _context.ProductVariants
+                .FirstOrDefaultAsync(v => v.SKU == request.SKU);
+
+            if (existingSKU != null)
+                throw new ConflictException("Detta SKU finns redan i databasen.");             
 
             var newVariant = new ProductVariant
             {
@@ -42,7 +42,7 @@ namespace FashionStoreAPI.Services
                 SKU = request.SKU,
                 Price = request.Price,
                 Stock = request.Stock,
-                ProductId = productId
+                ProductId = productId                
             };
 
             try
@@ -53,12 +53,12 @@ namespace FashionStoreAPI.Services
 
                 return new ProductVariantResponse
                 {
-                    Id = newVariant.Id,
+                    ProductVariantId = newVariant.Id,
                     Size = newVariant.Size,
                     SKU = newVariant.SKU,
                     Price = newVariant.Price,
                     Stock = newVariant.Stock,
-                    ProductId = newVariant.ProductId
+                    ProductId = existingProduct.Id
                 };
             }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
@@ -67,32 +67,35 @@ namespace FashionStoreAPI.Services
             }
         }
 
-        public async Task<ProductVariantResponse> UpdateExistingProductVariantAsync(UpdateProductVariantRequest request)
+        public async Task<ProductVariantResponse> UpdateExistingProductVariantAsync(int productId, UpdateProductVariantRequest request)
         {
-            var variant = await _context.ProductVariants
-                .FirstOrDefaultAsync(v => v.Id == request.ProductVariantId)
-                ?? throw new ResourceNotFoundException("Produktvarianten finns inte.");
+            var existingProduct = await _context.Products
+                .Include(p => p.ProductVariants)
+                .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new ResourceNotFoundException("Produkten finns inte.");
+
+            var existingVariant = existingProduct.ProductVariants
+                .FirstOrDefault(v => v.Id == request.ProductVariantId) ?? throw new ResourceNotFoundException("Produktvarianten finns inte.");            
 
             if (request.StockChange != null)
             {
-                variant.Stock += request.StockChange.Value;
-                if (variant.Stock < 0)
+                existingVariant.Stock += request.StockChange.Value;
+                if (existingVariant.Stock < 0)
                     throw new ArgumentException("Lagersaldot kan inte vara negativt.");
             }
 
-            if (request.NewPrice != null && request.NewPrice != variant.Price)
-                variant.Price = request.NewPrice.Value;
+            if (request.NewPrice != null && request.NewPrice != existingVariant.Price)
+                existingVariant.Price = request.NewPrice.Value;
 
             await _context.SaveChangesAsync();
 
             return new ProductVariantResponse
             {
-                Id = variant.Id,
-                Size = variant.Size,
-                SKU = variant.SKU,
-                Price = variant.Price,
-                Stock = variant.Stock,
-                ProductId = variant.ProductId
+                ProductVariantId = existingVariant.Id,
+                Size = existingVariant.Size,
+                SKU = existingVariant.SKU,
+                Price = existingVariant.Price,
+                Stock = existingVariant.Stock,
+                ProductId = existingProduct.Id
             };
         }
     }

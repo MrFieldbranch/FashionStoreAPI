@@ -22,9 +22,6 @@ namespace FashionStoreAPI.Entities
         public int Stock { get; set; } = 0;  
 
         public int ProductId { get; set; }
-
-
-        // Navigation property
-        public Product? Product { get; set; }              
+            
     }
 }

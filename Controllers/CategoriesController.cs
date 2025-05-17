@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FashionStoreAPI.Controllers
 {    
     [ApiController]
-    [Route("[controller]")]
+    [Route("categories")]
     public class CategoriesController : ControllerBase
     {
         private readonly CategoriesService _categoriesService;

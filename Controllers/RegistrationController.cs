@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FashionStoreAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("registration")]
     public class RegistrationController : ControllerBase
     {
         private readonly RegistrationService _registrationService;

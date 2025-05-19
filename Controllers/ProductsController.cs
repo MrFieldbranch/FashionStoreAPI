@@ -17,7 +17,7 @@ namespace FashionStoreAPI.Controllers
         }
 
         [HttpGet("{productId:int}")]
-        public async Task<ActionResult<ProductResponse>> GetProduct(int productId)
+        public async Task<ActionResult<DetailedProductResponse>> GetProduct(int productId)
         {
             try
             {

@@ -4,7 +4,6 @@ using FashionStoreAPI.Entities;
 using FashionStoreAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using System.ComponentModel.DataAnnotations;
 
 namespace FashionStoreAPI.Services
 {
@@ -43,7 +42,7 @@ namespace FashionStoreAPI.Services
                 Id = categoryWithProducts.Id,
                 Name = categoryWithProducts.Name,
                 ProductCount = categoryWithProducts.Products.Count,
-                ProductsInCategory = categoryWithProducts.Products.Select(p => new ProductResponse
+                ProductsInCategory = categoryWithProducts.Products.Select(p => new BasicProductResponse
                 {
                     Id = p.Id,
                     Name = p.Name,

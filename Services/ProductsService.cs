@@ -17,13 +17,13 @@ namespace FashionStoreAPI.Services
             _context = context;
         }
 
-        public async Task<ProductResponse> GetProductAsync(int productId)
+        public async Task<DetailedProductResponse> GetProductAsync(int productId)
         {
             var product = await _context.Products
                 .Include(p => p.ProductVariants)
                 .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new ResourceNotFoundException("Produkten finns inte.");
 
-            var response = new ProductResponse
+            var response = new DetailedProductResponse
             {
                 Id = product.Id,
                 Name = product.Name,
@@ -46,7 +46,7 @@ namespace FashionStoreAPI.Services
             return response;
         }
 
-        public async Task<ProductResponse> CreateNewProductAsync(int categoryId, CreateNewProductRequest request)
+        public async Task<DetailedProductResponse> CreateNewProductAsync(int categoryId, CreateNewProductRequest request)
         {
             var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name);
 
@@ -60,7 +60,7 @@ namespace FashionStoreAPI.Services
             {
                 Name = request.Name,
                 ProductSex = request.ProductSex,
-                Description = request.Description ?? "",
+                Description = string.IsNullOrEmpty(request.Description) ? null : request.Description,
                 ImageUrl = request.ImageUrl,
                 Color = request.Color                
             };
@@ -73,7 +73,7 @@ namespace FashionStoreAPI.Services
 
                 await _context.SaveChangesAsync();
 
-                return new ProductResponse
+                return new DetailedProductResponse
                 {
                     Id = newProduct.Id,
                     Name = newProduct.Name,
@@ -89,14 +89,14 @@ namespace FashionStoreAPI.Services
             }
         }
 
-        public async Task<ProductResponse> UpdateExistingProductAsync(int productId, UpdateExistingProductRequest request)
+        public async Task<DetailedProductResponse> UpdateExistingProductAsync(int productId, UpdateExistingProductRequest request)
         {
             var existingProduct = await _context.Products
                 .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new ResourceNotFoundException("Produkten finns inte.");
 
             try
             {
-                if (request.Name != null && request.Name != existingProduct.Name)
+                if (request.Name != existingProduct.Name)
                 {
                     var existingProductWithSameName = await _context.Products
                         .FirstOrDefaultAsync(p => p.Name == request.Name);
@@ -106,21 +106,21 @@ namespace FashionStoreAPI.Services
                         existingProduct.Name = request.Name;
                 }                     
 
-                if (request.Description != null && request.Description != existingProduct.Description)
+                if (request.Description != existingProduct.Description)
                     existingProduct.Description = request.Description;
 
-                if (request.Color != null && request.Color != existingProduct.Color)
+                if (request.Color != existingProduct.Color)
                     existingProduct.Color = request.Color;
 
-                if (request.ImageUrl != null && request.ImageUrl != existingProduct.ImageUrl)
+                if (request.ImageUrl != existingProduct.ImageUrl)
                     existingProduct.ImageUrl = request.ImageUrl;
 
-                if (request.ProductSex != null && request.ProductSex != existingProduct.ProductSex)
-                    existingProduct.ProductSex = request.ProductSex.Value;
+                if (request.ProductSex != existingProduct.ProductSex)
+                    existingProduct.ProductSex = request.ProductSex;
 
                 await _context.SaveChangesAsync();
 
-                return new ProductResponse
+                return new DetailedProductResponse
                 {
                     Id = existingProduct.Id,
                     Name = existingProduct.Name,

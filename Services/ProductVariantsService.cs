@@ -79,15 +79,15 @@ namespace FashionStoreAPI.Services
             var existingVariant = existingProduct.ProductVariants
                 .FirstOrDefault(v => v.Id == request.ProductVariantId) ?? throw new ResourceNotFoundException("Produktvarianten finns inte.");            
 
-            if (request.StockChange != null)
+            if (request.StockChange != 0)
             {
-                existingVariant.Stock += request.StockChange.Value;
+                existingVariant.Stock += request.StockChange;
                 if (existingVariant.Stock < 0)
                     throw new ArgumentException("Lagersaldot kan inte vara negativt.");
             }
 
-            if (request.NewPrice != null && request.NewPrice != existingVariant.Price)
-                existingVariant.Price = request.NewPrice.Value;
+            if (request.NewPrice != existingVariant.Price)
+                existingVariant.Price = request.NewPrice;
 
             await _context.SaveChangesAsync();
 

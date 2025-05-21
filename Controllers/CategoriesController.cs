@@ -17,6 +17,29 @@ namespace FashionStoreAPI.Controllers
             _categoriesService = categoriesService;
         }
 
+        [HttpGet("{categoryId:int}/sex/{sex}/products")]
+        public async Task<ActionResult<DetailedCategoryResponse>> GetProductsByCategoryBasedOnSex(int categoryId, string sex)
+        {
+            try
+            {
+                var categoryWithProductsBasedOnSex = await _categoriesService.GetProductsByCategoryBasedOnSexAsync(categoryId, sex);
+
+                return Ok(categoryWithProductsBasedOnSex);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
+            }
+        }
+
         [HttpGet("allcategories")] // Alla kategorier, utan några produkter
         public async Task<ActionResult<List<BasicCategoryResponse>>> GetAllCategories()
         {

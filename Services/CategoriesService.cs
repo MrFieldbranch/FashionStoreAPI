@@ -1,6 +1,7 @@
 ﻿using FashionStoreAPI.Data;
 using FashionStoreAPI.DTOs;
 using FashionStoreAPI.Entities;
+using FashionStoreAPI.Enums;
 using FashionStoreAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -14,6 +15,36 @@ namespace FashionStoreAPI.Services
         public CategoriesService(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<DetailedCategoryResponse> GetProductsByCategoryBasedOnSexAsync(int categoryId, string sex)
+        {
+            if (!Enum.TryParse<Sex>(sex, true, out var productSex))
+                throw new ArgumentException("Ogiltig könstyp.");
+
+            var categoryResponse = await _context.Categories
+                .Where(c => c.Id == categoryId)
+                .Select(c => new DetailedCategoryResponse
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    ProductsInCategory = c.Products
+                    .Where(p => p.ProductSex == productSex)
+                    .Select(p => new BasicProductResponse
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        ProductSex = p.ProductSex,
+                        ImageUrl = p.ImageUrl,
+                        StartPrice = p.ProductVariants.Count != 0 ? p.ProductVariants.Min(v => v.Price) : 0
+                    })
+                    .ToList()
+                })
+                .FirstOrDefaultAsync() ?? throw new ResourceNotFoundException("Kategorin finns inte.");
+
+            categoryResponse.ProductCount = categoryResponse.ProductsInCategory.Count;
+
+            return categoryResponse;
         }
 
         public async Task<List<BasicCategoryResponse>> GetAllCategoriesAsync()

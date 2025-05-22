@@ -17,6 +17,24 @@ namespace FashionStoreAPI.Services
             _context = context;
         }
 
+        public async Task<List<BasicCategoryResponse>> GetAllCategoriesBasedOnSexAsync(string sex)
+        {
+            if (!Enum.TryParse<Sex>(sex, true, out var productSex))
+                throw new ArgumentException("Ogiltig könstyp.");
+
+            var categories = await _context.Categories
+                .Where(c => c.Products.Any(p => p.ProductSex == productSex))
+                .OrderBy(c => c.Name)
+                .Select(c => new BasicCategoryResponse
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                })
+                .ToListAsync();
+
+            return categories;
+        }
+
         public async Task<DetailedCategoryResponse> GetProductsByCategoryBasedOnSexAsync(int categoryId, string sex)
         {
             if (!Enum.TryParse<Sex>(sex, true, out var productSex))

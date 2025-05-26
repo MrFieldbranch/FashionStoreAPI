@@ -10,8 +10,8 @@
 
 
         // Navigation properties
-        public User? User { get; set; }
+        public User User { get; set; } = null!;
 
-        public ProductVariant? ProductVariant { get; set; }
+        public ProductVariant ProductVariant { get; set; } = null!;
     }
 }

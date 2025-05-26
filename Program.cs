@@ -14,6 +14,9 @@ builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<CategoriesService>();
 builder.Services.AddScoped<ProductsService>();
 builder.Services.AddScoped<ProductVariantsService>();
+builder.Services.AddScoped<OrdersService>();
+builder.Services.AddScoped<LikedProductsService>();
+builder.Services.AddScoped<ShoppingBasketService>();
 
 builder.Services.AddControllers();
 

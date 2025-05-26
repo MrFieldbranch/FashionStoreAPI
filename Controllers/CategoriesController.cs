@@ -2,8 +2,8 @@
 using FashionStoreAPI.Exceptions;
 using FashionStoreAPI.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FashionStoreAPI.Controllers
 {    
@@ -38,9 +38,22 @@ namespace FashionStoreAPI.Controllers
         [HttpGet("{categoryId:int}/sex/{sex}/products")]
         public async Task<ActionResult<DetailedCategoryResponse>> GetProductsByCategoryBasedOnSex(int categoryId, string sex)
         {
+            int? userId = null;
+
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+
+            if (roleClaim != null && roleClaim.Value == "User")
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int parsedUserId))
+                    userId = parsedUserId;
+            }
+
+
             try
             {
-                var categoryWithProductsBasedOnSex = await _categoriesService.GetProductsByCategoryBasedOnSexAsync(categoryId, sex);
+                var categoryWithProductsBasedOnSex = await _categoriesService.GetProductsByCategoryBasedOnSexAsync(categoryId, sex, userId);
 
                 return Ok(categoryWithProductsBasedOnSex);
             }

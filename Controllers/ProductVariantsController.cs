@@ -1,5 +1,4 @@
 ﻿using FashionStoreAPI.DTOs;
-using FashionStoreAPI.Entities;
 using FashionStoreAPI.Exceptions;
 using FashionStoreAPI.Services;
 using Microsoft.AspNetCore.Authorization;

@@ -35,10 +35,17 @@ namespace FashionStoreAPI.Services
             return categories;
         }
 
-        public async Task<DetailedCategoryResponse> GetProductsByCategoryBasedOnSexAsync(int categoryId, string sex)
+        public async Task<DetailedCategoryResponse> GetProductsByCategoryBasedOnSexAsync(int categoryId, string sex, int? userId)
         {
             if (!Enum.TryParse<Sex>(sex, true, out var productSex))
                 throw new ArgumentException("Ogiltig könstyp.");
+
+            var likedProductIds = userId.HasValue
+                ? await _context.LikedProducts
+                .Where(lp => lp.UserId == userId)
+                .Select(lp => lp.ProductId)
+                .ToListAsync()
+                : new List<int>();
 
             var categoryResponse = await _context.Categories
                 .Where(c => c.Id == categoryId)
@@ -54,7 +61,8 @@ namespace FashionStoreAPI.Services
                         Name = p.Name,
                         ProductSex = p.ProductSex,
                         ImageUrl = p.ImageUrl,
-                        StartPrice = p.ProductVariants.Count != 0 ? p.ProductVariants.Min(v => v.Price) : 0
+                        StartPrice = p.ProductVariants.Count != 0 ? p.ProductVariants.Min(v => v.Price) : 0,
+                        IsLiked = userId.HasValue && likedProductIds.Contains(p.Id)
                     })
                     .ToList()
                 })

@@ -4,7 +4,6 @@ using FashionStoreAPI.Entities;
 using FashionStoreAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using System.ComponentModel.DataAnnotations;
 
 namespace FashionStoreAPI.Services
 {
@@ -17,11 +16,19 @@ namespace FashionStoreAPI.Services
             _context = context;
         }
 
-        public async Task<DetailedProductResponse> GetProductAsync(int productId)
+        public async Task<DetailedProductResponse> GetProductAsync(int productId, int? userId)
         {
             var product = await _context.Products
                 .Include(p => p.ProductVariants)
                 .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new ResourceNotFoundException("Produkten finns inte.");
+
+            bool isLiked = false;
+
+            if (userId.HasValue)
+            {
+                isLiked = await _context.LikedProducts
+                    .AnyAsync(lp => lp.UserId == userId && lp.ProductId == productId);
+            }
 
             var response = new DetailedProductResponse
             {
@@ -40,7 +47,8 @@ namespace FashionStoreAPI.Services
                     Price = v.Price,
                     Stock = v.Stock,
                     ProductId = product.Id
-                }).ToList()
+                }).ToList(),
+                IsLiked = isLiked
             };
 
             return response;

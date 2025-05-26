@@ -4,7 +4,6 @@ using FashionStoreAPI.Entities;
 using FashionStoreAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using System.ComponentModel.DataAnnotations;
 
 namespace FashionStoreAPI.Services
 {

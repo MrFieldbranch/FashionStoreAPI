@@ -9,5 +9,6 @@ namespace FashionStoreAPI.DTOs
         public Sex ProductSex { get; set; }
         public required string ImageUrl { get; set; }
         public double StartPrice { get; set; }
+        public bool? IsLiked { get; set; } = false;
     }
 }

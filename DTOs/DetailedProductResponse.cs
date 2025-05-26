@@ -19,5 +19,7 @@ namespace FashionStoreAPI.DTOs
         public required string Color { get; set; }
 
         public List<ProductVariantResponse> ProductVariants { get; set; } = [];
+
+        public bool? IsLiked { get; set; } = false;
     }
 }

@@ -3,9 +3,10 @@ using FashionStoreAPI.Exceptions;
 using FashionStoreAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FashionStoreAPI.Controllers
-{    
+{
     [ApiController]
     [Route("products")]
     public class ProductsController : ControllerBase
@@ -19,9 +20,21 @@ namespace FashionStoreAPI.Controllers
         [HttpGet("{productId:int}")]
         public async Task<ActionResult<DetailedProductResponse>> GetProduct(int productId)
         {
+            int? userId = null;            
+
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+
+            if (roleClaim != null && roleClaim.Value == "User")
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int parsedUserId))                
+                    userId = parsedUserId;                
+            }
+
             try
             {
-                var product = await _productsService.GetProductAsync(productId);
+                var product = await _productsService.GetProductAsync(productId, userId);
                 return Ok(product);
             }
             catch (ResourceNotFoundException ex)
@@ -32,7 +45,7 @@ namespace FashionStoreAPI.Controllers
             {
                 return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
-        }        
+        }
 
         [Authorize(Roles = "Admin")]
         [HttpPost("{categoryId:int}")]

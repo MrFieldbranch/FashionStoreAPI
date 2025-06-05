@@ -1,6 +1,7 @@
 ﻿using FashionStoreAPI.Data;
 using FashionStoreAPI.DTOs;
 using FashionStoreAPI.Entities;
+using FashionStoreAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace FashionStoreAPI.Services
@@ -16,6 +17,9 @@ namespace FashionStoreAPI.Services
 
         public async Task AddProductToLikedAsync(int userId, int productId)
         {
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new ResourceNotFoundException("Produkten hittades inte.");
+
             var existingLike = await _context.LikedProducts
                 .FirstOrDefaultAsync(lp => lp.UserId == userId && lp.ProductId == productId);
 
@@ -37,7 +41,7 @@ namespace FashionStoreAPI.Services
         {
             var existingLike = await _context.LikedProducts
                 .FirstOrDefaultAsync(lp => lp.UserId == userId && lp.ProductId == productId) 
-                ?? throw new ArgumentException("Produkten finns inte i dina gillade produkter.");
+                ?? throw new ResourceNotFoundException("Produkten finns inte i dina gillade produkter.");
 
             _context.LikedProducts.Remove(existingLike);
 

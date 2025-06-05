@@ -1,4 +1,5 @@
 ﻿using FashionStoreAPI.DTOs;
+using FashionStoreAPI.Exceptions;
 using FashionStoreAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -29,6 +30,10 @@ namespace FashionStoreAPI.Controllers
                 await _likedProductsService.AddProductToLikedAsync(userId, productId);
                 return Ok();
             }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
@@ -51,10 +56,10 @@ namespace FashionStoreAPI.Controllers
             {
                 await _likedProductsService.RemoveProductFromLikedAsync(userId, productId);
                 return Ok();
-            }
-            catch (ArgumentException ex)
+            }            
+            catch (ResourceNotFoundException ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound(ex.Message);
             }
             catch (Exception)
             {

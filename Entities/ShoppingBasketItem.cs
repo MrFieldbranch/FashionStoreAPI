@@ -4,9 +4,7 @@
     {
         public int UserId { get; set; }
 
-        public int ProductVariantId { get; set; }
-
-        public int Quantity { get; set; } = 1;
+        public int ProductVariantId { get; set; }        
 
 
         // Navigation properties

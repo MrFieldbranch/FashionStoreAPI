@@ -16,7 +16,7 @@
 
         public string Color { get; set; } = string.Empty;
 
-        public int Quantity { get; set; } = 1; //Antal av denna produktvariant i varukorgen
+        public int Quantity { get; set; } = 1; 
 
         //Kanske behöver ännu fler attribut senare
     }

@@ -17,7 +17,7 @@ namespace FashionStoreAPI.Controllers
             _productsService = productsService;
         }
 
-        [HttpGet("{productId:int}")]
+        [HttpGet("{productid:int}")]
         public async Task<ActionResult<DetailedProductResponse>> GetProduct(int productId)
         {
             int? userId = null;            
@@ -48,7 +48,7 @@ namespace FashionStoreAPI.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPost("{categoryId:int}")]
+        [HttpPost("{categoryid:int}")]
         public async Task<IActionResult> CreateNewProduct(int categoryId, CreateNewProductRequest request)
         {
             try
@@ -76,7 +76,7 @@ namespace FashionStoreAPI.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("{productId:int}")]
+        [HttpPut("{productid:int}")]
         public async Task<IActionResult> UpdateExistingProduct(int productId, UpdateExistingProductRequest request)
         {
             try

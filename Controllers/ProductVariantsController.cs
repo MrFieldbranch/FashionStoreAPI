@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FashionStoreAPI.Controllers
 {
     [ApiController]    
-    [Route("products/{productId}/productvariants")]
+    [Route("products/{productid}/productvariants")]
     public class ProductVariantsController : ControllerBase
     {
         private readonly ProductVariantsService _productVariantsService;

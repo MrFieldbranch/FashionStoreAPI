@@ -16,7 +16,7 @@ namespace FashionStoreAPI.Controllers
             _likedProductsService = likedProductsService;
         }
 
-        [HttpPost("{productId:int}")]
+        [HttpPost("{productid:int}")]
         public async Task<IActionResult> AddProductToLiked(int productId)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -44,7 +44,7 @@ namespace FashionStoreAPI.Controllers
             }
         }
 
-        [HttpDelete("{productId:int}")]
+        [HttpDelete("{productid:int}")]
         public async Task<IActionResult> RemoveProductFromLiked(int productId)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

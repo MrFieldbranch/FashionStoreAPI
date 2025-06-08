@@ -35,7 +35,7 @@ namespace FashionStoreAPI.Controllers
             }
         }
 
-        [HttpGet("{categoryId:int}/sex/{sex}/products")]
+        [HttpGet("{categoryid:int}/sex/{sex}/products")]
         public async Task<ActionResult<DetailedCategoryResponse>> GetProductsByCategoryBasedOnSex(int categoryId, string sex)
         {
             int? userId = null;
@@ -86,7 +86,7 @@ namespace FashionStoreAPI.Controllers
             }
         }
 
-        [HttpGet("{categoryId:int}/products")]
+        [HttpGet("{categoryid:int}/products")]
         public async Task<ActionResult<DetailedCategoryResponse>> GetProductsByCategory(int categoryId)
         {
             try

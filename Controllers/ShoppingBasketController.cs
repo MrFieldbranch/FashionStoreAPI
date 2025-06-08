@@ -1,4 +1,5 @@
 ﻿using FashionStoreAPI.DTOs;
+using FashionStoreAPI.Entities;
 using FashionStoreAPI.Exceptions;
 using FashionStoreAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace FashionStoreAPI.Controllers
             try
             {
                 await _shoppingBasketService.AddItemToShoppingBasketAsync(userId, request);
-                return Ok();
+                return Ok();                
             }
             catch (ResourceNotFoundException ex)
             {
@@ -67,7 +68,7 @@ namespace FashionStoreAPI.Controllers
         }
 
         [HttpGet("items")]
-        public async Task<ActionResult<List<ShoppingBasketItemResponse>>> GetShoppingBasketItems()
+        public async Task<ActionResult<ShoppingBasketResponse>> GetShoppingBasket()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
@@ -77,14 +78,42 @@ namespace FashionStoreAPI.Controllers
 
             try
             {
-                var items = await _shoppingBasketService.GetShoppingBasketItemsAsync(userId);
-                return Ok(items);
+                var basket = await _shoppingBasketService.GetShoppingBasketAsync(userId);
+                return Ok(basket);
             }
             catch (Exception)
             {
                 return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
 
+        }
+
+        [HttpPut("items/{productvariantid}/quantity")]
+        public async Task<IActionResult> ChangeQuantity(int productvariantid, ChangeQuantityRequest request)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized("Användaren är inte inloggad.");
+            }
+
+            try
+            {
+                await _shoppingBasketService.ChangeQuantityAsync(userId, productvariantid, request);
+                return Ok();
+            }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
+            }
         }
     }
 }

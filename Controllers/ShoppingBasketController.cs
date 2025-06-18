@@ -88,6 +88,26 @@ namespace FashionStoreAPI.Controllers
 
         }
 
+        [HttpGet("items/totalprice")]
+        public async Task<ActionResult<ShoppingBasketTotalAmountResponse>> GetShoppingBasketTotalAmount()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized("Användaren är inte inloggad.");
+            }
+
+            try
+            {
+                var totalAmount = await _shoppingBasketService.GetShoppingBasketTotalAmountAsync(userId);
+                return Ok(totalAmount);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
+            }
+        }
+
         [HttpPut("items/{productvariantid}/quantity")]
         public async Task<IActionResult> ChangeQuantity(int productvariantid, ChangeQuantityRequest request)
         {

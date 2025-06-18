@@ -1,6 +1,6 @@
 ﻿namespace FashionStoreAPI.DTOs
 {
-    public class OrderResponse
+    public class DetailedOrderResponse
     {
         public int OrderId { get; set; }        
         public DateTime OrderDate { get; set; }

@@ -1,4 +1,6 @@
-﻿using FashionStoreAPI.Services;
+﻿using FashionStoreAPI.DTOs;
+using FashionStoreAPI.Exceptions;
+using FashionStoreAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -15,7 +17,7 @@ namespace FashionStoreAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder()
+        public async Task<ActionResult<DetailedOrderResponse>> CreateOrder()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
@@ -25,8 +27,8 @@ namespace FashionStoreAPI.Controllers
 
             try
             {
-                await _ordersService.CreateOrderAsync(userId);
-                return Ok();
+                var orderResponse = await _ordersService.CreateOrderAsync(userId);
+                return CreatedAtAction(nameof(GetOrderById), new { orderId = orderResponse.OrderId }, orderResponse);
             }
             catch (ArgumentException ex)
             {
@@ -41,5 +43,43 @@ namespace FashionStoreAPI.Controllers
                 return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
         }
-    }    
+
+        [HttpGet("{orderId:int}")]
+        public async Task<ActionResult<DetailedOrderResponse>> GetOrderById(int orderId)
+        {
+            try
+            {
+                var orderResponse = await _ordersService.GetOrderByIdAsync(orderId);
+                return Ok(orderResponse);
+            }
+            catch (ResourceNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
+            }
+        }
+
+        [HttpGet("allorders")]
+        public async Task<ActionResult<List<BasicOrderResponse>>> GetAllOrdersForUser()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized("Användaren är inte inloggad.");
+            }
+
+            try
+            {
+                var allOrdersForUser = await _ordersService.GetAllOrdersForUserAsync(userId);
+                return Ok(allOrdersForUser);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
+            }
+        }
+    }
 }

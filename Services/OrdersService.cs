@@ -1,5 +1,7 @@
 ﻿using FashionStoreAPI.Data;
+using FashionStoreAPI.DTOs;
 using FashionStoreAPI.Entities;
+using FashionStoreAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace FashionStoreAPI.Services
@@ -13,7 +15,7 @@ namespace FashionStoreAPI.Services
             _context = context;
         }
 
-        public async Task CreateOrderAsync(int userId)
+        public async Task<DetailedOrderResponse> CreateOrderAsync(int userId)
         {
             var shoppingBasketItems = await _context.ShoppingBasketItems
                 .Include(sbi => sbi.ProductVariant)
@@ -65,6 +67,70 @@ namespace FashionStoreAPI.Services
             _context.LikedProducts.RemoveRange(likedProductsToRemove);
 
             await _context.SaveChangesAsync();
+
+            var orderResponse = new DetailedOrderResponse
+            {
+                OrderId = newOrder.Id,
+                OrderDate = newOrder.OrderDate,
+                TotalAmount = newOrder.TotalAmount,
+                Items = newOrder.OrderItems.Select(oi => new OrderItemResponse
+                {
+                    ProductName = oi.ProductVariant.Product.Name,
+                    Size = oi.ProductVariant.Size,
+                    PriceAtPurchaseTime = oi.PriceAtPurchaseTime,
+                    ImageUrl = oi.ProductVariant.Product.ImageUrl,
+                    Color = oi.ProductVariant.Product.Color,
+                    Quantity = oi.Quantity
+                }).ToList()
+            };
+
+            return orderResponse;
+        }
+
+        public async Task<DetailedOrderResponse> GetOrderByIdAsync(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.ProductVariant)
+                .ThenInclude(pv => pv.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId) ?? throw new ResourceNotFoundException("Ordern finns inte.");
+
+            var orderResponse = new DetailedOrderResponse
+            {
+                OrderId = order.Id,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                Items = order.OrderItems.Select(oi => new OrderItemResponse
+                {
+                    ProductName = oi.ProductVariant.Product.Name,
+                    Size = oi.ProductVariant.Size,
+                    PriceAtPurchaseTime = oi.PriceAtPurchaseTime,
+                    ImageUrl = oi.ProductVariant.Product.ImageUrl,
+                    Color = oi.ProductVariant.Product.Color,
+                    Quantity = oi.Quantity
+                }).ToList()
+            };
+
+            return orderResponse;
+        }
+
+        public async Task<List<BasicOrderResponse>> GetAllOrdersForUserAsync(int userId)
+        {
+            var orders = await _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            var basicOrderList = orders.Select(o => new BasicOrderResponse
+            {
+                OrderId = o.Id,
+                OrderDate = o.OrderDate,
+                TotalAmount = o.TotalAmount,
+                TotalQuantity = o.OrderItems.Sum(oi => oi.Quantity)
+            }).ToList();
+
+            return basicOrderList;
         }
     }
 }

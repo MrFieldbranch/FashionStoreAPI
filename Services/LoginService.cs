@@ -46,7 +46,8 @@ namespace FashionStoreAPI.Services
             var tokenResponse = new TokenResponse
             {
                 Token = jwtHandler.WriteToken(jwtSecurityToken),
-                FirstName = myUser.FirstName
+                FirstName = myUser.FirstName,
+                LastName = myUser.LastName
             };
             
             return tokenResponse;

@@ -107,7 +107,7 @@ namespace FashionStoreAPI.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> CreateNewCategory(CreateNewCategoryRequest request)
+        public async Task<IActionResult> CreateNewCategory(CreateNewCategoryRequest request) // Byta till ActionResult<T> kanske. Även på andra ställen?
         {
             try
             {

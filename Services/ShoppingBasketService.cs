@@ -94,6 +94,24 @@ namespace FashionStoreAPI.Services
             return shoppingBasketResponse;
         }
 
+        public async Task<ShoppingBasketTotalAmountResponse> GetShoppingBasketTotalAmountAsync(int userId)
+        {
+            var shoppingBasketItems = await _context.ShoppingBasketItems
+                .Include(sbi => sbi.ProductVariant)                
+                .Where(sbi => sbi.UserId == userId)
+                .ToListAsync();
+
+            var totalAmount = shoppingBasketItems
+                .Sum(sbi => sbi.Quantity * sbi.ProductVariant.Price);
+
+            var totalamountResponse = new ShoppingBasketTotalAmountResponse
+            {
+                TotalAmount = totalAmount
+            };
+
+            return totalamountResponse;
+        }
+
         public async Task ChangeQuantityAsync(int userId, int productVariantId, ChangeQuantityRequest request)
         {
             var existingItem = await _context.ShoppingBasketItems

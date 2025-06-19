@@ -2,7 +2,7 @@
 {
     public class OrderItemResponse
     { 
-        //public int OrderItemId { get; set; }
+        public int ProductVariantId { get; set; }
         public string ProductName { get; set; } = string.Empty;
         public string Size { get; set; } = string.Empty;
         public double PriceAtPurchaseTime { get; set; }

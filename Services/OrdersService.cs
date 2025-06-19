@@ -75,6 +75,7 @@ namespace FashionStoreAPI.Services
                 TotalAmount = newOrder.TotalAmount,
                 Items = newOrder.OrderItems.Select(oi => new OrderItemResponse
                 {
+                    ProductVariantId = oi.ProductVariantId,
                     ProductName = oi.ProductVariant.Product.Name,
                     Size = oi.ProductVariant.Size,
                     PriceAtPurchaseTime = oi.PriceAtPurchaseTime,
@@ -102,6 +103,7 @@ namespace FashionStoreAPI.Services
                 TotalAmount = order.TotalAmount,
                 Items = order.OrderItems.Select(oi => new OrderItemResponse
                 {
+                    ProductVariantId = oi.ProductVariantId,
                     ProductName = oi.ProductVariant.Product.Name,
                     Size = oi.ProductVariant.Size,
                     PriceAtPurchaseTime = oi.PriceAtPurchaseTime,

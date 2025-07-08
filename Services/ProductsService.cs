@@ -1,6 +1,7 @@
 ﻿using FashionStoreAPI.Data;
 using FashionStoreAPI.DTOs;
 using FashionStoreAPI.Entities;
+using FashionStoreAPI.Enums;
 using FashionStoreAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -52,6 +53,44 @@ namespace FashionStoreAPI.Services
             };
 
             return response;
+        }
+
+        public async Task<List<BasicProductResponse>> GetMostPopularProductsBasedOnSexAsync(string sex, int? userId)
+        {
+            if (!Enum.TryParse<Sex>(sex, true, out var productSex))
+                throw new ArgumentException("Ogiltig könstyp.");
+
+            var likedProductIds = userId.HasValue
+                ? await _context.LikedProducts
+                .Where(lp => lp.UserId == userId)
+                .Select(lp => lp.ProductId)
+                .ToListAsync()
+                : new List<int>();
+
+            var mostPopularProducts = await _context.OrderItems
+                .Include(oi => oi.ProductVariant)
+                .ThenInclude(pv => pv.Product)
+                .Where(oi => oi.ProductVariant.Product.ProductSex == productSex)
+                .GroupBy(oi => oi.ProductVariant.Product)
+                .Select(g => new
+                {
+                    Product = g.Key,
+                    TotalQuantitySold = g.Sum(oi => oi.Quantity)
+                })
+                .OrderByDescending(p => p.TotalQuantitySold)
+                .Take(8)
+                .Select(p => new BasicProductResponse 
+                {
+                    Id = p.Product.Id,
+                    Name = p.Product.Name,
+                    ProductSex = p.Product.ProductSex,
+                    ImageUrl = p.Product.ImageUrl,
+                    StartPrice = p.Product.ProductVariants.Min(v => v.Price),
+                    IsLiked = likedProductIds.Contains(p.Product.Id)
+                })
+                .ToListAsync();
+
+            return mostPopularProducts;
         }
 
         public async Task<DetailedProductResponse> CreateNewProductAsync(int categoryId, CreateNewProductRequest request)

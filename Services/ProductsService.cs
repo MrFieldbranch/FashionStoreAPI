@@ -57,40 +57,57 @@ namespace FashionStoreAPI.Services
 
         public async Task<List<BasicProductResponse>> GetMostPopularProductsBasedOnSexAsync(string sex, int? userId)
         {
-            if (!Enum.TryParse<Sex>(sex, true, out var productSex))
-                throw new ArgumentException("Ogiltig könstyp.");
+            try
+            {
+                if (!Enum.TryParse<Sex>(sex, true, out var productSex))
+                    throw new ArgumentException("Ogiltig könstyp.");
 
-            var likedProductIds = userId.HasValue
-                ? await _context.LikedProducts
-                .Where(lp => lp.UserId == userId)
-                .Select(lp => lp.ProductId)
-                .ToListAsync()
-                : new List<int>();
+                var likedProductIds = userId.HasValue
+                    ? await _context.LikedProducts
+                    .Where(lp => lp.UserId == userId)
+                    .Select(lp => lp.ProductId)
+                    .ToListAsync()
+                    : new List<int>();
 
-            var mostPopularProducts = await _context.OrderItems
-                .Include(oi => oi.ProductVariant)
-                .ThenInclude(pv => pv.Product)
-                .Where(oi => oi.ProductVariant.Product.ProductSex == productSex)
-                .GroupBy(oi => oi.ProductVariant.Product)
-                .Select(g => new
-                {
-                    Product = g.Key,
-                    TotalQuantitySold = g.Sum(oi => oi.Quantity)
-                })
-                .OrderByDescending(p => p.TotalQuantitySold)
-                .Take(8)
-                .Select(p => new BasicProductResponse 
-                {
-                    Id = p.Product.Id,
-                    Name = p.Product.Name,
-                    ProductSex = p.Product.ProductSex,
-                    ImageUrl = p.Product.ImageUrl,
-                    StartPrice = p.Product.ProductVariants.Min(v => v.Price),
-                    IsLiked = likedProductIds.Contains(p.Product.Id)
-                })
-                .ToListAsync();
+                var topProductIds = await _context.OrderItems
+                    .Where(oi => oi.ProductVariant.Product.ProductSex == productSex)
+                    .GroupBy(oi => oi.ProductVariant.ProductId)
+                    .Select(group => new
+                    {
+                        ProductId = group.Key,
+                        TotalQuantitySold = group.Sum(oi => oi.Quantity)
+                    })
+                    .OrderByDescending(x => x.TotalQuantitySold)
+                    .Take(8)
+                    .ToListAsync();
 
-            return mostPopularProducts;
+                var productIds = topProductIds.Select(x => x.ProductId).ToList();
+
+                var products = await _context.Products
+                    .Include(p => p.ProductVariants)
+                    .Where(p => productIds.Contains(p.Id))
+                    .ToListAsync();
+
+                var result = products
+                    .Where(p => p.ProductVariants.Count != 0)
+                    .Select(p => new BasicProductResponse
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        ProductSex = p.ProductSex,
+                        ImageUrl = p.ImageUrl,
+                        StartPrice = p.ProductVariants.Min(v => v.Price),
+                        IsLiked = likedProductIds.Contains(p.Id)
+                    })
+                    .ToList();
+
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Fel", ex);
+            }
         }
 
         public async Task<DetailedProductResponse> CreateNewProductAsync(int categoryId, CreateNewProductRequest request)
@@ -109,7 +126,7 @@ namespace FashionStoreAPI.Services
                 ProductSex = request.ProductSex,
                 Description = string.IsNullOrEmpty(request.Description) ? null : request.Description,
                 ImageUrl = request.ImageUrl,
-                Color = request.Color                
+                Color = request.Color
             };
 
             newProduct.Categories.Add(existingCategory);
@@ -148,10 +165,10 @@ namespace FashionStoreAPI.Services
                     var existingProductWithSameName = await _context.Products
                         .FirstOrDefaultAsync(p => p.Name == request.Name);
                     if (existingProductWithSameName != null)
-                        throw new ConflictException("En produkt med detta namn finns redan.");                    
+                        throw new ConflictException("En produkt med detta namn finns redan.");
                     else
                         existingProduct.Name = request.Name;
-                }                     
+                }
 
                 if (request.Description != existingProduct.Description)
                     existingProduct.Description = request.Description;
@@ -180,7 +197,7 @@ namespace FashionStoreAPI.Services
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
             {
                 throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 200 tecken.");
-            }            
+            }
         }
     }
 }

@@ -71,9 +71,10 @@ namespace FashionStoreAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
+                var originalMessage = ex.InnerException?.Message ?? ex.Message;
+                return StatusCode(500, $"Problem med databasen. Vänligen försök igen. {originalMessage}");
             }
 
         }

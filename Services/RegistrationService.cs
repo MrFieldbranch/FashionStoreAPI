@@ -22,13 +22,15 @@ namespace FashionStoreAPI.Services
 
             if (existingUser != null)            
                 return false; // Email already exists
-            
+
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
             try
             {
                 var newUser = new User
                 {
                     Email = request.Email,
-                    Password = request.Password, // In a real application, hash the password
+                    Password = hashedPassword,
                     FirstName = request.FirstName,
                     LastName = request.LastName
                 };
@@ -41,7 +43,7 @@ namespace FashionStoreAPI.Services
             }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)  // Testa detta sen
             {
-                throw new ArgumentException("Email kan max vara 40 tecken långt, lösenordet, förnamnet och efternamnet kan max vara 30 tecken långa var.");
+                throw new ArgumentException("Email kan max vara 40 tecken långt, förnamnet och efternamnet kan max vara 30 tecken långa var.");
             }            
         }
     }

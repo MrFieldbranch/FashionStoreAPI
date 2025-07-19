@@ -20,10 +20,15 @@ namespace FashionStoreAPI.Services
 
         public async Task<TokenResponse?> AuthenticateAsync(LoginRequest request)
         {
-            var myUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.Password == request.Password);
+            var myUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (myUser == null)
-                return null; // User not found or password incorrect            
+                return null; // User not found
+                             
+            bool isValidPassword = BCrypt.Net.BCrypt.Verify(request.Password, myUser.Password);
+
+            if (!isValidPassword)
+                return null; // Invalid password
 
             var signingKey = Convert.FromBase64String(_configuration["JWT:SigningSecret"] ?? throw new InvalidOperationException("JWT SigningSecret är inte konfigurerad."));
 

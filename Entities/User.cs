@@ -11,7 +11,7 @@ namespace FashionStoreAPI.Entities
         [MaxLength(40)]
         public required string Email { get; set; }
 
-        [MaxLength(30)]
+        [MaxLength(150)]
         public required string Password { get; set; }
 
         [MaxLength(30)]

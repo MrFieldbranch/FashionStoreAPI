@@ -25,7 +25,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "http://localhost:5174") // Lägg till sen: production url.
+            .WithOrigins("http://localhost:5173", "https://fancy-fashion.onrender.com")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });

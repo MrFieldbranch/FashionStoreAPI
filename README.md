@@ -66,7 +66,9 @@ These endpoints require a valid JWT token with the Admin role.
 
 ### Authentication Notes
 Most endpoints require a valid JWT token in the Authorization header as:
+```http
 Authorization: Bearer {token}
+```
 User identity is extracted from the token (via claims) in many endpoints to determine which user is sending the request.
 
 ### Database

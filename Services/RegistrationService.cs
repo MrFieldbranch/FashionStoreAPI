@@ -41,7 +41,7 @@ namespace FashionStoreAPI.Services
 
                 return true; // Registration successful
             }
-            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)  // Testa detta sen
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "22001")  // Testa detta sen
             {
                 throw new ArgumentException("Email kan max vara 40 tecken långt, förnamnet och efternamnet kan max vara 30 tecken långa var.");
             }            

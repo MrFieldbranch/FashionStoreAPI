@@ -8,7 +8,7 @@ namespace FashionStoreAPI.DTOs
         
         public required string Size { get; set; }
         
-        public required string SKU { get; set; }
+        //public required string SKU { get; set; }   Tar bort denna, eftersom SKU ska beräknas i service-metoden
 
         public required double Price { get; set; }
 

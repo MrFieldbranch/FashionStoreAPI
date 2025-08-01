@@ -13,7 +13,7 @@ namespace FashionStoreAPI.Entities
         [MaxLength(15)]
         public required string Size { get; set; }
 
-        [MaxLength(20)]
+        [MaxLength(30)]
         public required string SKU { get; set; }
 
         public required double Price { get; set; }

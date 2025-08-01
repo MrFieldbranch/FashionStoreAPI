@@ -147,7 +147,7 @@ namespace FashionStoreAPI.Services
                     Color = newProduct.Color
                 };
             }
-            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "22001")
             {
                 throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 200 tecken."); // Testa detta sedan.
             }
@@ -194,7 +194,7 @@ namespace FashionStoreAPI.Services
                     Color = existingProduct.Color
                 };
             }
-            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "22001")
             {
                 throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 200 tecken.");
             }

@@ -136,7 +136,7 @@ namespace FashionStoreAPI.Services
                     Name = newCategory.Name
                 };
             }
-            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "22001")
             {
                 throw new ArgumentException("Namnet på kategorin kan max vara 30 tecken långt."); // Testa detta sedan.
             }            

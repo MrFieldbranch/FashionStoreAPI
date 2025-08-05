@@ -40,7 +40,8 @@ namespace FashionStoreAPI.Services
                 Description = product.Description ?? "",
                 Color = product.Color,
                 StartPrice = product.ProductVariants.Count != 0 ? product.ProductVariants.Min(v => v.Price) : 0,
-                ProductVariants = product.ProductVariants.Select(v => new ProductVariantResponse
+                ProductVariants = SortProductVariantsBySize(product.ProductVariants)
+                .Select(v => new ProductVariantResponse
                 {
                     ProductVariantId = v.Id,
                     Size = v.Size,
@@ -198,6 +199,40 @@ namespace FashionStoreAPI.Services
             {
                 throw new ArgumentException("Max längd: Namn: 30 tecken, Färg: 20 tecken, Beskrivning: 200 tecken, ImageUrl: 200 tecken.");
             }
+        }
+
+        private List<ProductVariant> SortProductVariantsBySize(IEnumerable<ProductVariant> variants)
+        {
+            var sizeOrder = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["XS"] = 0,
+                ["S"] = 1,
+                ["M"] = 2,
+                ["L"] = 3,
+                ["XL"] = 4,
+                ["XXL"] = 5,
+
+                ["34"] = 10,
+                ["35"] = 11,
+                ["36"] = 12,
+                ["37"] = 13,
+                ["38"] = 14,
+                ["39"] = 15,
+                ["40"] = 16,
+                ["41"] = 17,
+                ["42"] = 18,
+                ["43"] = 19,
+                ["44"] = 20,
+                ["45"] = 21,
+                ["46"] = 22,
+                ["47"] = 23,
+
+                ["OneSize"] = 100
+            };
+
+            return variants
+                .OrderBy(v => sizeOrder.TryGetValue(v.Size, out var priority) ? priority : int.MaxValue)
+                .ToList();
         }
     }
 }

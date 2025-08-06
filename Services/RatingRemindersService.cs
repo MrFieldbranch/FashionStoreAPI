@@ -18,13 +18,13 @@ namespace FashionStoreAPI.Services
             if (!userId.HasValue)
                 return new List<RatingReminderResponse>();
 
-            var cutoffDate = DateTime.UtcNow.AddDays(-7);
+            //var cutoffDate = DateTime.UtcNow.AddDays(-7);  // Tar bort denna just nu
 
             var reminders = await _context.RatingReminders
                     .Include(rr => rr.Product)
                     .Where(rr => rr.UserId == userId
-                    && !rr.HasBeenAnswered
-                    && rr.CreatedAt <= cutoffDate)
+                    && !rr.HasBeenAnswered)
+                    //&& rr.CreatedAt <= cutoffDate)
                     .Select(rr => new RatingReminderResponse
                     {
                         ProductId = rr.ProductId,
@@ -34,6 +34,33 @@ namespace FashionStoreAPI.Services
                     .ToListAsync();
 
             return reminders;
+        }
+
+        public async Task<bool> MarkReminderAsAnsweredAsync(int userId, int productId)
+        {
+            var reminder = await _context.RatingReminders
+                .FirstOrDefaultAsync(rr => rr.UserId == userId && rr.ProductId == productId);
+
+            if (reminder == null)
+                return false;
+
+            reminder.HasBeenAnswered = true;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task MarkAllRemindersAsAnsweredAsync(int userId)
+        {
+            var reminders = await _context.RatingReminders
+                .Where(rr => rr.UserId == userId && !rr.HasBeenAnswered)
+                .ToListAsync();
+
+            foreach (var reminder in reminders)
+            {
+                reminder.HasBeenAnswered = true;
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

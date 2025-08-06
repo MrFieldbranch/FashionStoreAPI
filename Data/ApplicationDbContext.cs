@@ -17,6 +17,9 @@ namespace FashionStoreAPI.Data
         public DbSet<ShoppingBasketItem> ShoppingBasketItems { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
+        public DbSet<RatingReminder> RatingReminders { get; set; } = null!;
+        public DbSet<Rating> Ratings { get; set; } = null!;
+        public DbSet<Review> Reviews { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -28,7 +31,13 @@ namespace FashionStoreAPI.Data
                 .HasKey(sbi => new { sbi.UserId, sbi.ProductVariantId });
 
             modelBuilder.Entity<OrderItem>()
-                .HasKey(oi => new { oi.OrderId, oi.ProductVariantId });           
+                .HasKey(oi => new { oi.OrderId, oi.ProductVariantId });
+
+            modelBuilder.Entity<Rating>()
+                .HasOne(r => r.Review)
+                .WithOne(rv => rv.Rating)
+                .HasForeignKey<Review>(rv => rv.RatingId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

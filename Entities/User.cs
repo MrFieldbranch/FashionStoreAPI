@@ -27,5 +27,11 @@ namespace FashionStoreAPI.Entities
         public ICollection<ShoppingBasketItem> ShoppingBasketItems { get; set; } = [];
 
         public ICollection<Order> Orders { get; set; } = [];
+
+        public ICollection<Rating> Ratings { get; set; } = [];
+
+        public ICollection<Review> Reviews { get; set; } = [];
+
+        public ICollection<RatingReminder> RatingReminders { get; set; } = [];
     }
 }

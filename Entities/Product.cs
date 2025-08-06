@@ -26,5 +26,9 @@ namespace FashionStoreAPI.Entities
         public ICollection<Category> Categories { get; set; } = [];
 
         public ICollection<ProductVariant> ProductVariants { get; set; } = [];
+
+        public ICollection<Rating> Ratings { get; set; } = [];
+
+        public ICollection<Review> Reviews { get; set; } = [];
     }
 }

@@ -74,10 +74,16 @@ namespace FashionStoreAPI.Services
             var totalAmount = shoppingBasketItems
                 .Sum(sbi => sbi.Quantity * sbi.ProductVariant.Price);
 
+            var productIds = shoppingBasketItems
+                .Select(sbi => sbi.ProductVariant.ProductId)
+                .Distinct()
+                .ToList();
+
             var shoppingBasketResponse = new ShoppingBasketResponse
             {
                 TotalQuantity = totalQuantity,
                 TotalAmount = totalAmount,
+                ProductIds = productIds,
                 Items = shoppingBasketItems.Select(sbi => new ShoppingBasketItemResponse
                 {
                     ProductVariantId = sbi.ProductVariantId,

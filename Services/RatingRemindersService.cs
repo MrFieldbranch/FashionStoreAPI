@@ -1,5 +1,6 @@
 ﻿using FashionStoreAPI.Data;
 using FashionStoreAPI.DTOs;
+using FashionStoreAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace FashionStoreAPI.Services
@@ -60,6 +61,25 @@ namespace FashionStoreAPI.Services
                 reminder.HasBeenAnswered = true;
             }
 
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task CreateRatingRemindersAsync(int userId, List<int> productIds)
+        {
+            var existingReminders = await _context.RatingReminders
+                .Where(rr => rr.UserId == userId && productIds.Contains(rr.ProductId))
+                .Select(rr => rr.ProductId)
+                .ToListAsync();
+
+            var newReminders = productIds
+                .Except(existingReminders)
+                .Select(productId => new RatingReminder
+                {
+                    UserId = userId,
+                    ProductId = productId,
+                });
+
+            await _context.RatingReminders.AddRangeAsync(newReminders);
             await _context.SaveChangesAsync();
         }
     }

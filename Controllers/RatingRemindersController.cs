@@ -99,5 +99,32 @@ namespace FashionStoreAPI.Controllers
                 return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
         }
+
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateRatingReminders([FromBody] List<int> productIds)
+        {
+            int? userId = null;
+
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+            if (roleClaim != null && roleClaim.Value == "User")
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int parsedUserId))
+                    userId = parsedUserId;
+            }
+
+            if (!userId.HasValue)
+                return Unauthorized();
+
+            try
+            {
+                await _ratingRemindersService.CreateRatingRemindersAsync(userId.Value, productIds);
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
+            }
+        }
     }
 }

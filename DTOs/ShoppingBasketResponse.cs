@@ -7,5 +7,7 @@
         public double TotalAmount { get; set; } = 0;
 
         public int TotalQuantity { get; set; } = 0;
+
+        public List<int> ProductIds { get; set; } = [];
     }
 }

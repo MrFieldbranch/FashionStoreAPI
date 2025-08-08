@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace FashionStoreAPI.Entities
 {
@@ -7,6 +8,7 @@ namespace FashionStoreAPI.Entities
     {
         public int Id { get; set; }
 
+        [MaxLength(500)]
         public required string Text { get; set; }
 
         public int UserId { get; set; }

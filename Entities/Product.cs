@@ -31,8 +31,10 @@ namespace FashionStoreAPI.Entities
 
         public ICollection<Review> Reviews { get; set; } = [];
 
-        public double AverageGrade { get; set; }
+        public int SumOfGrades { get; set; }
 
         public int RatingsCount { get; set; }
+
+        public double AverageGrade { get; set; }        
     }
 }

@@ -2,6 +2,7 @@
 using FashionStoreAPI.Exceptions;
 using FashionStoreAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace FashionStoreAPI.Controllers
@@ -19,9 +20,6 @@ namespace FashionStoreAPI.Controllers
         [HttpPost("{productId:int}")]
         public async Task<IActionResult> CreateRating(int productId, [FromBody] CreateRatingRequest request)
         {
-            if (request.Grade < 1 || request.Grade > 5)
-                return BadRequest("Betyget måste vara mellan 1 och 5.");
-
             int? userId = null;
 
             var roleClaim = User.FindFirst(ClaimTypes.Role);
@@ -42,6 +40,10 @@ namespace FashionStoreAPI.Controllers
                 await _ratingsService.CreateRatingAsync(productId, userId.Value, request.Grade);
                 return NoContent();
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (ResourceNotFoundException ex)
             {
                 return NotFound(ex.Message);
@@ -49,6 +51,14 @@ namespace FashionStoreAPI.Controllers
             catch (ConflictException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return BadRequest("Du har redan betygsatt denna produkt.");
             }
             catch (Exception ex)
             {

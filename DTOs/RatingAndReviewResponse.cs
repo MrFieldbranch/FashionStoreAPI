@@ -11,5 +11,9 @@
         public int? ReviewId { get; set; }
 
         public string? ReviewText { get; set; }
+
+        public string UserFirstName { get; set; } = null!;
+
+        public string UserLastName { get; set; } = null!;
     }
 }

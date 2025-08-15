@@ -62,7 +62,9 @@ namespace FashionStoreAPI.Services
                         ProductSex = p.ProductSex,
                         ImageUrl = p.ImageUrl,
                         StartPrice = p.ProductVariants.Count != 0 ? p.ProductVariants.Min(v => v.Price) : 0,
-                        IsLiked = userId.HasValue && likedProductIds.Contains(p.Id)
+                        IsLiked = userId.HasValue && likedProductIds.Contains(p.Id),
+                        RatingsCount = p.RatingsCount,
+                        AverageGrade = Math.Round(p.AverageGrade, 1)
                     })
                     .ToList()
                 })

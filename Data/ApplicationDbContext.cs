@@ -37,6 +37,7 @@ namespace FashionStoreAPI.Data
                 .HasOne(r => r.Review)
                 .WithOne(rv => rv.Rating)
                 .HasForeignKey<Review>(rv => rv.RatingId)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -21,6 +21,10 @@ namespace FashionStoreAPI.Services
         {
             var product = await _context.Products
                 .Include(p => p.ProductVariants)
+                .Include(p => p.Ratings)
+                .ThenInclude(r => r.Review)
+                .Include(p => p.Ratings)
+                .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new ResourceNotFoundException("Produkten finns inte.");
 
             bool isLiked = false;
@@ -50,7 +54,20 @@ namespace FashionStoreAPI.Services
                     Stock = v.Stock,
                     ProductId = product.Id
                 }).ToList(),
-                IsLiked = isLiked
+                IsLiked = isLiked,
+                RatingsCount = product.RatingsCount,
+                AverageGrade = Math.Round(product.AverageGrade, 1),
+                RatingsAndReviews = product.Ratings
+                .Select(r => new RatingAndReviewResponse
+                {
+                    RatingId = r.Id,
+                    ProductId = r.ProductId,
+                    Grade = r.Grade,
+                    ReviewId = r.Review?.Id,
+                    ReviewText = r.Review?.Text ?? null,
+                    UserFirstName = r.User.FirstName,
+                    UserLastName = r.User.LastName
+                }).ToList()
             };
 
             return response;
@@ -98,7 +115,9 @@ namespace FashionStoreAPI.Services
                         ProductSex = p.ProductSex,
                         ImageUrl = p.ImageUrl,
                         StartPrice = p.ProductVariants.Min(v => v.Price),
-                        IsLiked = likedProductIds.Contains(p.Id)
+                        IsLiked = likedProductIds.Contains(p.Id),
+                        RatingsCount = p.RatingsCount,
+                        AverageGrade = Math.Round(p.AverageGrade, 1)
                     })
                     .ToList();
 

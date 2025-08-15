@@ -19,28 +19,23 @@ namespace FashionStoreAPI.Services
         {
             var product = await _context.Products
                 .Include(p => p.Ratings)
+                .ThenInclude(r => r.Review)
                 .FirstOrDefaultAsync(p => p.Id == productId) ?? throw new ResourceNotFoundException("Produkten finns inte.");
 
             var existingRatingForProduct = product.Ratings
-                .FirstOrDefault(r => r.ProductId == productId && r.UserId == userId) ?? throw new ResourceNotFoundException("Du kan inte recensera en produkt om du inte har betygsatt den.");
+                .FirstOrDefault(r => r.ProductId == productId && r.UserId == userId) 
+                ?? throw new ResourceNotFoundException("Du kan inte recensera en produkt om du inte har betygsatt den.");
 
-            var existingReview = await _context.Reviews
-                .FirstOrDefaultAsync(r => r.ProductId == productId && r.UserId == userId);
+            if (existingRatingForProduct.Review != null)
+                throw new ConflictException("Du har redan recenserat denna produkt med betyg");
 
-            if (existingReview != null)
-                throw new ConflictException("Du har redan recenserat denna produkt.");
-            else
-            {
-                var review = new Review
-                {
-                    ProductId = productId,
-                    UserId = userId,
-                    Text = text,
-                    RatingId = existingRatingForProduct.Id
-                };
+            var review = new Review
+            {                
+                Text = text,
+                RatingId = existingRatingForProduct.Id
+            };
 
-                _context.Reviews.Add(review);
-            }
+            _context.Reviews.Add(review);
 
             try
             {

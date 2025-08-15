@@ -63,7 +63,9 @@ namespace FashionStoreAPI.Services
                 ProductSex = lp.Product.ProductSex,
                 ImageUrl = lp.Product.ImageUrl,
                 StartPrice = lp.Product.ProductVariants.Count != 0 ? lp.Product.ProductVariants.Min(v => v.Price) : 0,
-                IsLiked = true // All products in this list are liked
+                IsLiked = true, // All products in this list are liked
+                RatingsCount = lp.Product.RatingsCount,
+                AverageGrade = Math.Round(lp.Product.AverageGrade, 1)
             }).ToList();
 
             return likedProductsResponse;

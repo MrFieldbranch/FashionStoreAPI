@@ -71,7 +71,7 @@ namespace FashionStoreAPI.Services
             };
 
             return response;
-        }
+        }        
 
         public async Task<List<BasicProductResponse>> GetMostPopularProductsBasedOnSexAsync(string sex, int? userId)
         {
@@ -121,6 +121,51 @@ namespace FashionStoreAPI.Services
                     })
                     .ToList();
 
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Fel", ex);
+            }
+        }
+
+        public async Task<List<BasicProductResponse>> GetBestRatedProductsBasedOnSexAsync(string sex, int? userId)
+        {
+            try
+            {
+                if (!Enum.TryParse<Sex>(sex, true, out var productSex))
+                    throw new ArgumentException("Ogiltig könstyp.");
+
+                var likedProductIds = userId.HasValue
+                    ? await _context.LikedProducts
+                    .Where(lp => lp.UserId == userId)
+                    .Select(lp => lp.ProductId)
+                    .ToListAsync()
+                    : new List<int>();
+
+                var bestRatedProducts = await _context.Products
+                    .Include(p => p.ProductVariants)
+                    .Where(p => p.ProductSex == productSex && p.RatingsCount > 0)
+                    .OrderByDescending(p => p.AverageGrade)
+                    .ThenByDescending(p => p.RatingsCount)
+                    .Take(8)
+                    .ToListAsync();
+
+                var result = bestRatedProducts
+                    .Where(p => p.ProductVariants.Count != 0)
+                    .Select(p => new BasicProductResponse
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        ProductSex = p.ProductSex,
+                        ImageUrl = p.ImageUrl,
+                        StartPrice = p.ProductVariants.Min(v => v.Price),
+                        IsLiked = likedProductIds.Contains(p.Id),
+                        RatingsCount = p.RatingsCount,
+                        AverageGrade = Math.Round(p.AverageGrade, 1)
+                    })
+                    .ToList();
 
                 return result;
             }

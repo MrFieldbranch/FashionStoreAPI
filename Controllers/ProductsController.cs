@@ -46,6 +46,7 @@ namespace FashionStoreAPI.Controllers
                 return StatusCode(500, "Problem med databasen. Vänligen försök igen.");
             }
         }
+        
 
         [HttpGet("most-popular")]
         public async Task<ActionResult<List<BasicProductResponse>>> GetMostPopularProductsBasedOnSex([FromQuery] string sex)
@@ -77,6 +78,37 @@ namespace FashionStoreAPI.Controllers
                 return StatusCode(500, $"Problem med databasen. Vänligen försök igen. {originalMessage}");
             }
 
+        }
+
+        [HttpGet("best-rated")]
+        public async Task<ActionResult<List<BasicProductResponse>>> GetBestRatedProductsBasedOnSex([FromQuery] string sex)
+        {
+            int? userId = null;
+
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+
+            if (roleClaim != null && roleClaim.Value == "User")
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int parsedUserId))
+                    userId = parsedUserId;
+            }
+
+            try
+            {
+                var bestRatedProducts = await _productsService.GetBestRatedProductsBasedOnSexAsync(sex, userId);
+                return Ok(bestRatedProducts);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                var originalMessage = ex.InnerException?.Message ?? ex.Message;
+                return StatusCode(500, $"Problem med databasen. Vänligen försök igen. {originalMessage}");
+            }
         }
 
         [Authorize(Roles = "Admin")]
